@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: exam_user
+      POSTGRES_PASSWORD: exam_pass
+      POSTGRES_DB: examdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      - APP_PORT=8080
+      - DB_DRIVER=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=exam_user
+      - DB_PASSWORD=exam_pass
+      - DB_NAME=examdb
+      - DB_SSLMODE=disable
+    ports:
+      - "8080:8080"
+    restart: on-failure
+
+volumes:
+  pgdata:
