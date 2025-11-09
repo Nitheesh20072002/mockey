@@ -1,18 +1,19 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/mockey/internal/db"
+	"github.com/mockey/internal/models"
+	"github.com/mockey/internal/repo"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/mockey/exam-api/internal/db"
-	"github.com/mockey/exam-api/internal/models"
-	"github.com/mockey/exam-api/internal/repo"
 )
 
 // RegisterRequest is the expected payload for registration.
@@ -53,7 +54,9 @@ func Register(c *gin.Context) {
 
 	ur := repo.NewUserRepo(db.DB)
 	if err := ur.Create(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("failed to create user %v",err),
+		})
 		return
 	}
 

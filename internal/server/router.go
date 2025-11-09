@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mockey/exam-api/internal/server/handlers"
-	"github.com/mockey/exam-api/internal/server/middleware"
+	"github.com/mockey/internal/server/handlers"
+	"github.com/mockey/internal/server/middleware"
 )
 
 // SetupRoutes registers routes on the provided Gin engine.
-func SetupRoutes(r *gin.Engine) {
+func 	SetupRoutes(r *gin.Engine) {
 	api := r.Group("/api/v1")
 	{
 		api.GET("/health", func(c *gin.Context) {

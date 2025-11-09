@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"github.com/mockey/exam-api/internal/models"
+	"github.com/mockey/internal/models"
 	"gorm.io/gorm"
 )
 

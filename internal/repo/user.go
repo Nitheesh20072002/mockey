@@ -3,8 +3,8 @@ package repo
 import (
 	"errors"
 
+	"github.com/mockey/internal/models"
 	"gorm.io/gorm"
-	"github.com/mockey/exam-api/internal/models"
 )
 
 // UserRepo provides DB operations for users.

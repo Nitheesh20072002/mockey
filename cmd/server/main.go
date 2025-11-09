@@ -6,9 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/mockey/exam-api/internal/db"
-	"github.com/mockey/exam-api/internal/models"
-	"github.com/mockey/exam-api/internal/server"
+	"github.com/mockey/internal/db"
+	"github.com/mockey/internal/server"
 )
 
 func main() {
@@ -22,14 +21,9 @@ func main() {
 	}
 
 	// initialize DB
-	gdb, err := db.Init()
+	_, err := db.Init()
 	if err != nil {
 		log.Fatalf("failed to initialize database: %v", err)
-	}
-
-	// automigrate basic models
-	if err := gdb.AutoMigrate(&models.User{}, &models.Exam{}, &models.UploadJob{}); err != nil {
-		log.Fatalf("auto migrate failed: %v", err)
 	}
 
 	r := gin.Default()

@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mockey/exam-api/internal/db"
-	"github.com/mockey/exam-api/internal/models"
-	"github.com/mockey/exam-api/internal/repo"
-	"github.com/mockey/exam-api/internal/importer"
+	"github.com/mockey/internal/db"
+	"github.com/mockey/internal/importer"
+	"github.com/mockey/internal/models"
+	"github.com/mockey/internal/repo"
 )
 
 // UploadQuestions accepts a multipart file and returns a job id for async processing.

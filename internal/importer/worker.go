@@ -5,12 +5,10 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
-	"github.com/mockey/exam-api/internal/db"
-	"github.com/mockey/exam-api/internal/models"
-	"github.com/mockey/exam-api/internal/repo"
+	"github.com/mockey/internal/db"
+	"github.com/mockey/internal/repo"
 )
 
 // ProcessUploadFile performs a simple CSV row count and updates UploadJob status.

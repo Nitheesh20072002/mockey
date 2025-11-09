@@ -10,5 +10,5 @@ run:
 tidy:
 	go mod tidy
 
-docker-up:
+dev:
 	docker compose up --build

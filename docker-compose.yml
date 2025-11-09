@@ -9,13 +9,37 @@ services:
       POSTGRES_DB: examdb
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U exam_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
+
+  migrate:
+    image: migrate/migrate:v4.15.2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["-path=/migrations", "-database=postgres://exam_user:exam_pass@postgres:5432/examdb?sslmode=disable", "up"]
+    volumes:
+      - ./migrations:/migrations
+    restart: "no"
+  pgweb:
+    image: sosedoff/pgweb
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=postgres://exam_user:exam_pass@postgres:5432/examdb?sslmode=disable
+    depends_on:
+      - migrate
 
   api:
     build: .
     depends_on:
       - postgres
+      - migrate
     environment:
       - APP_PORT=8080
       - DB_DRIVER=postgres

@@ -12,9 +12,9 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/mockey/exam-api/internal/db"
-	"github.com/mockey/exam-api/internal/models"
-	"github.com/mockey/exam-api/internal/server"
+	"github.com/mockey/internal/db"
+	"github.com/mockey/internal/models"
+	"github.com/mockey/internal/server"
 )
 
 func setupTestDBForAdmin(t *testing.T) *gorm.DB {
