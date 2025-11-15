@@ -3,34 +3,71 @@ package handlers_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/mockey/internal/db"
-	"github.com/mockey/internal/models"
 	"github.com/mockey/internal/server"
 )
 
-func setupTestDBForAdmin(t *testing.T) *gorm.DB {
-	gdb, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+func setupTestDBForAdmin(t *testing.T) *sqlx.DB {
+	testDB, err := sqlx.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatalf("failed to open test db: %v", err)
 	}
 
-	if err := gdb.AutoMigrate(&models.User{}, &models.Exam{}); err != nil {
-		t.Fatalf("auto migrate failed: %v", err)
+	// Create tables for testing
+	schema := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		email TEXT UNIQUE NOT NULL,
+		phone TEXT,
+		password TEXT NOT NULL,
+		role TEXT DEFAULT 'student',
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
+	CREATE TABLE IF NOT EXISTS exams (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL,
+		description TEXT,
+		duration_minutes INTEGER DEFAULT 0,
+		created_by INTEGER,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+
+	CREATE TABLE IF NOT EXISTS upload_jobs (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		file_name TEXT,
+		status TEXT DEFAULT 'pending',
+		total_rows INTEGER,
+		processed_rows INTEGER,
+		errors TEXT,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+	`
+
+	if _, err := testDB.Exec(schema); err != nil {
+		t.Fatalf("failed to create tables: %v", err)
 	}
 
 	// assign to package db.DB so handlers use it
-	db.DB = gdb
+	db.DB = testDB
 
-	return gdb
+	return testDB
 }
 
 func TestCreateExam(t *testing.T) {
@@ -46,6 +83,22 @@ func TestCreateExam(t *testing.T) {
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/exams", bytes.NewReader(b))
 	req.Header.Set("Content-Type", "application/json")
+	// create a valid JWT for the protected admin route
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = "dev-secret"
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":  1,
+		"role": "admin",
+		"iat":  time.Now().Unix(),
+		"exp":  time.Now().Add(time.Hour).Unix(),
+	})
+	s, err := token.SignedString([]byte(secret))
+	if err != nil {
+		t.Fatalf("failed to sign token: %v", err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s))
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 

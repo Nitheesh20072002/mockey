@@ -1,19 +1,16 @@
 package models
 
 import (
-    "time"
-
-    "gorm.io/gorm"
+	"time"
 )
 
 // Exam represents exam metadata.
 type Exam struct {
-    ID          uint           `gorm:"primaryKey" json:"id"`
-    Title       string         `gorm:"size:255;not null" json:"title"`
-    Description string         `gorm:"type:text" json:"description"`
-    TimeLimit   int            `gorm:"default:0" json:"time_limit_minutes"` // minutes
-    CreatedBy   uint           `json:"created_by"`
-    CreatedAt   time.Time      `json:"created_at"`
-    UpdatedAt   time.Time      `json:"updated_at"`
-    DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+    ID               int       `db:"id" json:"id"`
+    Title            string    `db:"title" json:"title"`
+    Description      string    `db:"description" json:"description"`
+    DurationMinutes  int       `db:"duration_minutes" json:"duration_minutes"`
+    CreatedBy        int       `db:"created_by" json:"created_by"`
+    CreatedAt        time.Time `db:"created_at" json:"created_at"`
+    UpdatedAt        time.Time `db:"updated_at" json:"updated_at"`
 }

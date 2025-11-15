@@ -1,20 +1,17 @@
 package models
 
 import (
-    "time"
-
-    "gorm.io/gorm"
+	"time"
 )
 
 // UploadJob represents a file import job.
 type UploadJob struct {
-    ID            uint           `gorm:"primaryKey" json:"id"`
-    FileName      string         `gorm:"size:1024" json:"file_name"`
-    Status        string         `gorm:"size:50;default:'pending'" json:"status"`
-    TotalRows     int            `json:"total_rows"`
-    ProcessedRows int            `json:"processed_rows"`
-    Errors        string         `gorm:"type:text" json:"errors"`
-    CreatedAt     time.Time      `json:"created_at"`
-    UpdatedAt     time.Time      `json:"updated_at"`
-    DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
+	ID            int       `db:"id" json:"id"`
+	FileName      string    `db:"file_name" json:"file_name"`
+	Status        string    `db:"status" json:"status"`
+	TotalRows     int       `db:"total_rows" json:"total_rows"`
+	ProcessedRows int       `db:"processed_rows" json:"processed_rows"`
+	Errors        string    `db:"errors" json:"errors"`
+	CreatedAt     time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt     time.Time `db:"updated_at" json:"updated_at"`
 }

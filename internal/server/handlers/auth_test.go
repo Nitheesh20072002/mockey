@@ -9,28 +9,41 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/mockey/internal/db"
-	"github.com/mockey/internal/models"
 	"github.com/mockey/internal/server"
 )
 
-func setupTestDB(t *testing.T) *gorm.DB {
-	gdb, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+func setupTestDB(t *testing.T) *sqlx.DB {
+	testDB, err := sqlx.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatalf("failed to open test db: %v", err)
 	}
 
-	if err := gdb.AutoMigrate(&models.User{}); err != nil {
-		t.Fatalf("auto migrate failed: %v", err)
+	// Create users table for testing
+	schema := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		email TEXT UNIQUE NOT NULL,
+		phone TEXT,
+		password TEXT NOT NULL,
+		role TEXT DEFAULT 'student',
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+	`
+
+	if _, err := testDB.Exec(schema); err != nil {
+		t.Fatalf("failed to create tables: %v", err)
 	}
 
 	// assign to package db.DB so handlers use it
-	db.DB = gdb
+	db.DB = testDB
 
-	return gdb
+	return testDB
 }
 
 func TestRegisterAndLogin(t *testing.T) {
@@ -41,10 +54,10 @@ func TestRegisterAndLogin(t *testing.T) {
 	os.Setenv("JWT_SECRET", "test-secret")
 
 	// setup in-memory DB
-	gdb := setupTestDB(t)
+	testDB := setupTestDB(t)
 
 	// override global DB in package
-	_ = gdb
+	_ = testDB
 
 	r := gin.Default()
 	server.SetupRoutes(r)

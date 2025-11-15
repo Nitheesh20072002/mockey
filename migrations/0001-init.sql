@@ -4,7 +4,9 @@ CREATE TABLE exams (
   title text,
   description text,
   duration_minutes int,
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  created_by INT REFERENCES users(id),
+  updated_at TIMESTAMPTZ DEFAULT now();
 );
 
 
@@ -34,6 +36,7 @@ duration_minutes int,
 is_live boolean DEFAULT false,
 config jsonb,
 created_at timestamptz DEFAULT now()
+updated_at timestamptz DEFAULT now()
 );
 
 
@@ -78,4 +81,15 @@ answer jsonb,
 is_marked_for_review boolean DEFAULT false,
 time_spent_seconds int,
 created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE upload_jobs (
+  id SERIAL PRIMARY KEY,
+  file_name TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending',
+  total_rows INTEGER DEFAULT 0,
+  processed_rows INTEGER DEFAULT 0,
+  errors TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );

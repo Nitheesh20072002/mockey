@@ -6,12 +6,12 @@ import (
 
 // User represents a user of the system.
 type User struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Name      string    `gorm:"size:255;not null" json:"name"`
-	Email     string    `gorm:"size:255;uniqueIndex;not null" json:"email"`
-	Phone     string    `gorm:"size:50;uniqueIndex" json:"phone"`
-	Password  string    `gorm:"size:255;not null" json:"-"`
-	Role      string    `gorm:"size:50;default:'student'" json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        int       `db:"id" json:"id"`
+	Name      string    `db:"name" json:"name"`
+	Email     string    `db:"email" json:"email"`
+	Phone     string    `db:"phone" json:"phone"`
+	Password  string    `db:"password" json:"-"`
+	Role      string    `db:"role" json:"role"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }

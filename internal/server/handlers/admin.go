@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"net/http"
-	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mockey/internal/db"
@@ -24,17 +24,28 @@ func CreateExam(c *gin.Context) {
 		return
 	}
 
-	// In this scaffold we accept an optional created_by from env (for tests/demo)
-	createdBy := uint(0)
-	if cb := os.Getenv("DEMO_ADMIN_ID"); cb != "" {
-		// ignore parse error for scaffolding simplicity
+	// extract user id set by JWT middleware (claims 'sub')
+	createdBy := 0
+	if uid, ok := c.Get("user_id"); ok {
+		switch v := uid.(type) {
+		case float64:
+			createdBy = int(v)
+		case int:
+			createdBy = v
+		case int64:
+			createdBy = int(v)
+		case string:
+			if n, err := strconv.Atoi(v); err == nil {
+				createdBy = n
+			}
+		}
 	}
 
 	exam := models.Exam{
-		Title:       req.Title,
-		Description: req.Description,
-		TimeLimit:   req.TimeLimit,
-		CreatedBy:   createdBy,
+		Title:           req.Title,
+		Description:     req.Description,
+		DurationMinutes: req.TimeLimit,
+		CreatedBy:       createdBy,
 	}
 
 	er := repo.NewExamRepo(db.DB)

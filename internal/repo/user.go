@@ -1,29 +1,30 @@
 package repo
 
 import (
-	"errors"
-
+	"github.com/jmoiron/sqlx"
 	"github.com/mockey/internal/models"
-	"gorm.io/gorm"
 )
 
 // UserRepo provides DB operations for users.
 type UserRepo struct {
-	db *gorm.DB
+	db *sqlx.DB
 }
 
-func NewUserRepo(db *gorm.DB) *UserRepo {
+func NewUserRepo(db *sqlx.DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
 func (r *UserRepo) Create(u *models.User) error {
-	return r.db.Create(u).Error
+	query := `INSERT INTO users (name, email, phone, password, role, created_at, updated_at) 
+	         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
+	return r.db.QueryRow(query, u.Name, u.Email, u.Phone, u.Password, u.Role, u.CreatedAt, u.UpdatedAt).Scan(&u.ID)
 }
 
 func (r *UserRepo) GetByEmail(email string) (*models.User, error) {
 	var u models.User
-	if err := r.db.Where("email = ?", email).First(&u).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+	err := r.db.Get(&u, "SELECT id, name, email, phone, password, role, created_at, updated_at FROM users WHERE email = $1", email)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
 			return nil, nil
 		}
 		return nil, err
@@ -33,8 +34,9 @@ func (r *UserRepo) GetByEmail(email string) (*models.User, error) {
 
 func (r *UserRepo) GetByID(id interface{}) (*models.User, error) {
 	var u models.User
-	if err := r.db.First(&u, id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+	err := r.db.Get(&u, "SELECT id, name, email, phone, password, role, created_at, updated_at FROM users WHERE id = $1", id)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
 			return nil, nil
 		}
 		return nil, err

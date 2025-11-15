@@ -2,19 +2,16 @@ package db
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"time"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
-var DB *gorm.DB
+var DB *sqlx.DB
 
 // Init initializes the database connection and assigns DB global.
-func Init() (*gorm.DB, error) {
+func Init() (*sqlx.DB, error) {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
@@ -27,18 +24,13 @@ func Init() (*gorm.DB, error) {
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=UTC", host, user, pass, name, port, ssl)
 
-	newLogger := logger.New(
-		log.New(os.Stdout, "", log.LstdFlags),
-		logger.Config{
-			SlowThreshold:             time.Second,
-			LogLevel:                  logger.Warn,
-			IgnoreRecordNotFoundError: true,
-			Colorful:                  false,
-		},
-	)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: newLogger})
+	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
+		return nil, err
+	}
+
+	// Test the connection
+	if err := db.Ping(); err != nil {
 		return nil, err
 	}
 
